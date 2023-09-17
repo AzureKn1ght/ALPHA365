@@ -134,14 +134,19 @@ const ALPHACompound = async () => {
   const today = new Date();
   const gasTime = new Date(restakes.nextGas);
   if (today > gasTime) {
+    report.payFees = [];
     // loop through for each wallet
     for (const wallet of wallets) {
       console.log("payGas()");
     }
+
+    // wait for all the promises to finish resolving
+    const payments = await Promise.allSettled(promises);
+    for (const payment of payments) {
+      report.payFees.push(payment);
+    }
+    promises = [];
   }
-  // wait for gas to finish resolving
-  await Promise.allSettled(promises);
-  promises = [];
 
   // store last compound date
   restakes.previousRestake = today.toString();
