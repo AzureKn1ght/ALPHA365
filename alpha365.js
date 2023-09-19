@@ -208,10 +208,10 @@ const ALPHACompound = async () => {
   sendReport();
 };
 
-// Airdrop Individual Wallet [TODO]
+// Airdrop Individual Wallet
 const airdrop = async (wallet, tries = 1.0) => {
   const w = wallet.address.slice(0, 5) + "..." + wallet.address.slice(-6);
-  /*try {
+  try {
     console.log(`- Wallet ${wallet["index"]} -`);
     console.log("Airdroping...");
 
@@ -227,16 +227,22 @@ const airdrop = async (wallet, tries = 1.0) => {
       gasPrice: ethers.utils.parseUnits(tries.toString(), "gwei"),
     };
 
-    // get the airdrop balance and the downline to send it to
-    const val = await connection.vault.airdropBalance(wallet.address);
-    console.log("Airdroping: " + val.toString());
-    const addresses = [wallet.downline];
-    const amounts = [val];
+    let airdroppees = [];
+    let amountsArr = [];
+    let sendAmount = 0;
+
+    // form the inputs for calling the airdrop
+    sendAmount = await connection.token.balanceOf(wallet.address);
+    console.log("Airdroping: " + sendAmount.toString());
+    const airdropAddress = wallet.downline;
+    airdroppees.push(airdropAddress);
+    amountsArr.push(sendAmount);
 
     // call airdrop function and await the results
     const result = await connection.vault.airdrop(
-      addresses,
-      amounts,
+      airdroppees,
+      amountsArr,
+      sendAmount,
       overrideOptions
     );
     const airdropped = await connection.provider.waitForTransaction(
@@ -247,17 +253,24 @@ const airdrop = async (wallet, tries = 1.0) => {
 
     // succeeded
     if (airdropped) {
-      const v = await connection.vault.airdropBalance(wallet.address);
+      const v = await connection.vault.getAirdropsSentAndRecieved(
+        wallet.address
+      );
       console.log(`Airdrop${wallet["index"]}: success`);
-      const airdropBal = ethers.utils.formatEther(v);
+      const sent = ethers.utils.formatEther(sendAmount);
+      const s = ethers.utils.formatEther(v[0]);
+      const r = ethers.utils.formatEther(v[1]);
 
       const success = {
         index: wallet.index,
         wallet: w,
-        downline: addresses,
-        airdropBal: airdropBal,
+        sendAmount: sent,
+        downline: airdroppees,
+        historicalReceived: r,
+        historicalSent: s,
         airdrop: true,
         tries: tries,
+        RAW: v,
       };
 
       // return status
@@ -284,7 +297,7 @@ const airdrop = async (wallet, tries = 1.0) => {
     // failed, retrying again...
     console.log(`retrying(${tries})...`);
     return await airdrop(wallet, ++tries);
-  }*/
+  }
 };
 
 // Compound Individual Wallet
@@ -454,7 +467,7 @@ const scheduleNext = async (nextDate) => {
   console.log("Next Restake: ", nextDate);
 
   // schedule next restake
-  scheduler.scheduleJob(nextDate, ARKCompound);
+  scheduler.scheduleJob(nextDate, ALPHACompound);
   storeData();
   return;
 };
