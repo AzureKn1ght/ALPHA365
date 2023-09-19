@@ -189,7 +189,7 @@ const ALPHACompound = async () => {
 
   // calculate the average wallet size
   const average = eval(balances.join("+")) / balances.length;
-  report.consolidated = { average: average, target: "300 ALPHA" };
+  report.consolidated = { average: average, target: "262 ALPHA" };
 
   // find the maximum timestamp of all
   const m = Math.max(...report.actions.map((o) => o.timestamp), 0);
