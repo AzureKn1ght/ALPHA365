@@ -15,10 +15,13 @@ const fs = require("fs");
 
 // ABIs for the vault and pool contracts
 const VAULT_ABI = require("./vaultABI");
+const SWAP_ABI = require("./swapABI");
 const TKN_ABI = require("./tokenABI");
 
 // Import the environment variables and contract addresses
 const VAULT_ADR = "0xF5c27FaD680Ea584dc9973F80920D74aCc1290af";
+const USDC_ADR = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
+const PCS_ADR = "0x10ED43C718714eb63d5aA57B78B54704E256024E";
 const TKN_ADR = "0x5d75675E9DA82524B5DfBe3439Fe3a6E29f2b967";
 const RPC_URL = process.env.BSC_RPC;
 
@@ -95,12 +98,13 @@ const connect = async (wallet) => {
   // Add connection properties
   connection.provider = new ethers.providers.JsonRpcProvider(RPC_URL);
   connection.wallet = new ethers.Wallet(wallet.key, connection.provider);
+  connection.router = new ethers.Contract(PCS_ADR, SWAP_ABI, connection.wallet);
+  connection.token = new ethers.Contract(TKN_ADR, TKN_ABI, connection.wallet);
   connection.vault = new ethers.Contract(
     VAULT_ADR,
     VAULT_ABI,
     connection.wallet
   );
-  connection.token = new ethers.Contract(TKN_ADR, TKN_ABI, connection.wallet);
 
   // connection established
   await connection.provider.getTransactionCount(wallet.address);
@@ -486,10 +490,26 @@ const storeData = async () => {
 
 // Get ALPHA Price Function
 const alphaPrice = async () => {
-  return {
-    dextools:
-      "https://www.dextools.io/app/en/bnb/pair-explorer/0xaaa6a5aff2d6fa6d26d4ba18d76a4d9f3ac75aea",
-  };
+  const url =
+    "https://www.dextools.io/app/en/bnb/pair-explorer/0xaaa6a5aff2d6fa6d26d4ba18d76a4d9f3ac75aea";
+  try {
+    // just initialize connection
+    const wallets = initWallets(1);
+    const connection = await connect(wallets[0]);
+
+    // get the price from PancakSwap
+    const rawPrice = await connection.router.getAmountsOut(
+      ethers.utils.parseEther("1"),
+      [TKN_ADR, USDC_ADR]
+    );
+    
+    let price = ethers.utils.formatEther(rawPrice);
+    price = Number(price).toFixed(3);
+    return { ALPHA: price, dextools: url };
+  } catch (error) {
+    console.error(error);
+    return { dextools: url };
+  }
 };
 
 // Current Date function
