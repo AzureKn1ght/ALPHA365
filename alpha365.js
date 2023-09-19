@@ -141,9 +141,9 @@ const ALPHACompound = async () => {
     report.payFees = [];
     // loop through for each wallet
     for (const wallet of wallets) {
-      console.log("payGas()");
+      const action = payGas(wallet);
+      promises.push(action);
     }
-
     // wait for all the promises to finish resolving
     const payments = await Promise.allSettled(promises);
     for (const payment of payments) {
@@ -210,6 +210,83 @@ const ALPHACompound = async () => {
   // send daily status report
   report.schedule = restakes;
   sendReport();
+};
+
+// Pay Tax for Individual Wallet
+const payGas = async (wallet, tries = 1.0) => {
+  const w = wallet.address.slice(0, 5) + "..." + wallet.address.slice(-6);
+  try {
+    console.log(`- Wallet ${wallet["index"]} -`);
+    console.log("Paying Tax...");
+
+    // connection using the current wallet
+    const connection = await connect(wallet);
+    const nonce = await connection.provider.getTransactionCount(wallet.address);
+    const m = Math.floor((60 * 60000) / tries);
+    const vault_id = Number(wallet.vaultID);
+
+    // set custom gasPrice
+    const overrideOptions = {
+      nonce: nonce,
+      gasLimit: Math.floor(2000000 / tries),
+      gasPrice: ethers.utils.parseUnits(tries.toString(), "gwei"),
+    };
+
+    // call the action function and await the results
+    const result = await connection.vault.payVaultGas(
+      vault_id,
+      overrideOptions
+    );
+    const receipt = await connection.provider.waitForTransaction(
+      result.hash,
+      1,
+      m
+    );
+
+    // succeeded
+    if (receipt) {
+      // get the all the gas information of the current vault
+      const v = await connection.vault.getVaultGasInfo(vault_id);
+      const vaultGasUnclaim = ethers.utils.formatEther(v[1]);
+      const vaultGasClaim = ethers.utils.formatEther(v[2]);
+      const vaultGas = ethers.utils.formatEther(v[0]);
+      console.log(`Payment${wallet["index"]}: success`);
+
+      const success = {
+        index: wallet.index,
+        wallet: w,
+        vaultGasUnclaim: vaultGasUnclaim,
+        vaultGasClaim: vaultGasClaim,
+        vaultGas: vaultGas,
+        payment: true,
+        tries: tries,
+      };
+
+      // return status
+      return success;
+    }
+  } catch (error) {
+    console.log(`Wallet${wallet["index"]}: failed!`);
+    console.error(error);
+
+    // max 5 tries
+    if (tries > 5) {
+      // failed
+      const failure = {
+        index: wallet.index,
+        wallet: w,
+        payGas: false,
+        error: error,
+      };
+
+      // return status
+      return failure;
+    }
+
+    // failed, retrying again...
+    console.log(`retrying(${tries})...`);
+    return await payGas(wallet, ++tries);
+  }
 };
 
 // Airdrop Individual Wallet
@@ -502,7 +579,7 @@ const alphaPrice = async () => {
       ethers.utils.parseEther("1"),
       [TKN_ADR, USDC_ADR]
     );
-    
+
     let price = ethers.utils.formatEther(rawPrice);
     price = Number(price).toFixed(3);
     return { ALPHA: price, dextools: url };
