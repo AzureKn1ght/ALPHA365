@@ -588,8 +588,8 @@ const alphaPrice = async () => {
       [TKN_ADR, USDC_ADR]
     );
 
-    let price = ethers.utils.formatEther(rawPrice);
-    price = Number(price).toFixed(3);
+    let price = ethers.utils.formatEther(rawPrice[1]);
+    price = Number(price).toFixed(4);
     return { ALPHA: price, dextools: url };
   } catch (error) {
     console.error(error);
