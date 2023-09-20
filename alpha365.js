@@ -28,9 +28,9 @@ const RPC_URL = process.env.BSC_RPC;
 // Storage obj
 var restakes = {
   previousRestake: "",
-  nextRestake: "",
+  nextRestake: new Date(),
   prevGas: "",
-  nextGas: "",
+  nextGas: new Date(),
   count: 1,
 };
 var report = {};
@@ -200,7 +200,7 @@ const ALPHACompound = async () => {
   restakes.prevGas = gas.toString();
 
   // store next gas payment
-  gas.setHours(gas.getHours + 24 * 7);
+  gas.setHours(gas.getHours() + 24 * 7);
   restakes.nextGas = gas.toString();
 
   // schedule the next action date
@@ -242,6 +242,7 @@ const payGas = async (wallet, tries = 1.0) => {
       1,
       m
     );
+    const url = "https://bscscan.com/tx/" + result.hash;
 
     // succeeded
     if (receipt) {
@@ -260,6 +261,7 @@ const payGas = async (wallet, tries = 1.0) => {
         vaultGas: vaultGas,
         payment: true,
         tries: tries,
+        url: url,
       };
 
       // return status
@@ -331,6 +333,7 @@ const airdrop = async (wallet, tries = 1.0) => {
       1,
       m
     );
+    const url = "https://bscscan.com/tx/" + result.hash;
 
     // succeeded
     if (airdropped) {
@@ -351,6 +354,7 @@ const airdrop = async (wallet, tries = 1.0) => {
         historicalSent: s,
         airdrop: true,
         tries: tries,
+        url: url,
         RAW: v,
       };
 
@@ -408,6 +412,7 @@ const compound = async (wallet, tries = 1.0) => {
       1,
       m
     );
+    const url = "https://bscscan.com/tx/" + result.hash;
 
     // succeeded
     if (receipt) {
@@ -429,6 +434,7 @@ const compound = async (wallet, tries = 1.0) => {
         compound: true,
         timestamp: date,
         gastime: gas,
+        url: url,
         tries: tries,
       };
 
@@ -486,6 +492,7 @@ const claim = async (wallet, tries = 1.0) => {
       1,
       m
     );
+    const url = "https://bscscan.com/tx/" + result.hash;
 
     // succeeded
     if (receipt) {
@@ -509,6 +516,7 @@ const claim = async (wallet, tries = 1.0) => {
         timestamp: date,
         gastime: gas,
         tries: tries,
+        url: url,
         airdrop: drop,
       };
 
