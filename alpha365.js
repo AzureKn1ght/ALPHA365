@@ -355,7 +355,6 @@ const airdrop = async (wallet, tries = 1.0) => {
         airdrop: true,
         tries: tries,
         url: url,
-        RAW: v,
       };
 
       // return status
