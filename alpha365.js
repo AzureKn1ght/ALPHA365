@@ -112,7 +112,7 @@ const connect = async (wallet) => {
   return connection;
 };
 
-// ARK Compound Function
+// ALPHA Compound Function
 const ALPHACompound = async () => {
   // start function
   console.log("\n");
@@ -740,7 +740,7 @@ const sellTokens = async (wallet, tries = 1.0) => {
         vault: {
           vaultCompounded: ethers.utils.formatEther(v[0]),
           vaultClaimed: ethers.utils.formatEther(v[1]),
-          AR: v[2],
+          AR: v[2].toString(),
           ARJail: v[3],
           unClaimedReward: ethers.utils.formatEther(v[4]),
           vaultGas: ethers.utils.formatEther(v[5]),
