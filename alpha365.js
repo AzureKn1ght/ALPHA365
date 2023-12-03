@@ -21,7 +21,7 @@ const TKN_ABI = require("./tokenABI");
 // Import the environment variables and contract addresses
 const VAULT_ADR = "0xF5c27FaD680Ea584dc9973F80920D74aCc1290af";
 const USDC_ADR = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
-const PCS_ADR = "0x8cBd19dE48E307a5F9fE8414Fc5247E5B17DeA48"; //note: changed to Alpha Swap
+const PCS_ADR = "0x0Ad12A52894cFD74220202bF7E9A9Eff81443017"; //note: changed to Alpha Swap
 const TKN_ADR = "0x5d75675E9DA82524B5DfBe3439Fe3a6E29f2b967";
 const RPC_URL = process.env.BSC_RPC;
 
@@ -713,10 +713,9 @@ const sellTokens = async (wallet, tries = 1.0) => {
     // form the inputs for calling the swap
     const sellAmount = await connection.token.balanceOf(wallet.address);
     console.log("Selling Off: " + sellAmount.toString());
-    const maxAmt = sellAmount.mul(100) || Number.MAX_SAFE_INTEGER;
 
     // call selling function and await the results
-    const result = await connection.router.sellAlphaForBUSD(sellAmount, maxAmt);
+    const result = await connection.router.sellAlphaForBUSD(sellAmount);
     const url = "https://bscscan.com/tx/" + result.hash;
     const receipt = await result.wait();
 
@@ -806,7 +805,7 @@ const storeData = async () => {
 // Get ALPHA Price Function
 const alphaPrice = async () => {
   const url =
-    "https://bscscan.com/token/0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d?a=0x8cbd19de48e307a5f9fe8414fc5247e5b17dea48#tokenAnalytics";
+    "https://bscscan.com/token/0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d?a=0x0Ad12A52894cFD74220202bF7E9A9Eff81443017#tokenAnalytics";
   try {
     // just initialize connection
     const wallets = initWallets(1);

@@ -103,6 +103,13 @@ const abi = [
     type: "function",
   },
   {
+    inputs: [{ internalType: "address", name: "", type: "address" }],
+    name: "blacklist",
+    outputs: [{ internalType: "bool", name: "", type: "bool" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [],
     name: "busdPriceInToken",
     outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
@@ -110,10 +117,7 @@ const abi = [
     type: "function",
   },
   {
-    inputs: [
-      { internalType: "uint256", name: "busdAmount", type: "uint256" },
-      { internalType: "address", name: "referer", type: "address" },
-    ],
+    inputs: [{ internalType: "uint256", name: "busdAmount", type: "uint256" }],
     name: "buyBUSDForVaultDeposit",
     outputs: [],
     stateMutability: "nonpayable",
@@ -240,11 +244,18 @@ const abi = [
     type: "function",
   },
   {
-    inputs: [
-      { internalType: "uint256", name: "tokenAmount", type: "uint256" },
-      { internalType: "uint256", name: "_halfBalance", type: "uint256" },
-    ],
+    inputs: [{ internalType: "uint256", name: "tokenAmount", type: "uint256" }],
     name: "sellAlphaForBUSD",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      { internalType: "address[]", name: "_botAddress", type: "address[]" },
+      { internalType: "bool", name: "_flag", type: "bool" },
+    ],
+    name: "setBlacklist",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -286,6 +297,13 @@ const abi = [
   },
   {
     inputs: [],
+    name: "totalBuyFee",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
     name: "totalSellFee",
     outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "view",
@@ -312,9 +330,20 @@ const abi = [
   },
   {
     inputs: [
+      { internalType: "uint256", name: "buyFee", type: "uint256" },
+      { internalType: "uint256", name: "sellFee", type: "uint256" },
+    ],
+    name: "updateFeePercent",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
       { internalType: "address", name: "_token", type: "address" },
       { internalType: "address", name: "_nft", type: "address" },
       { internalType: "address", name: "_vaultAddress", type: "address" },
+      { internalType: "address", name: "_busd", type: "address" },
     ],
     name: "updateTokenAddress",
     outputs: [],
